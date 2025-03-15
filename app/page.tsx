@@ -1,103 +1,164 @@
+"use client";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import ScrollTrigger from "gsap/dist/ScrollTrigger";
+import SplitText from "gsap/dist/SplitText";
+import { Leva } from "leva";
 import Image from "next/image";
+import Link from "next/link";
+import {
+  type FC,
+  type HTMLAttributes,
+  type PropsWithChildren,
+  useState,
+} from "react";
 
-export default function Home() {
+import chevronRight from "@/assets/chevron-right.svg";
+import replayIcon from "@/assets/replay.svg";
+import Scene from "@/components/Scene";
+
+gsap.registerPlugin(useGSAP, ScrollTrigger, SplitText);
+
+// Setup the WebGPU renderer
+// Load image with useTexture hook
+// Display on a plane with basic color node
+// Fix stretching and aspect ratio with UV transformation
+
+// Generate a rounded box signed distance function (SDF)
+// Scale this to create the reveal effect
+
+// Position the image components
+// Setup an animation for each of their reveal effects
+
+// Create UI components
+// - CSS color function to generate darker blue and teal from the original colors
+// - New Tailwind 4 gradient syntax
+
+export default function ImagenHeaderPage() {
+  const [replayTime, setReplayTime] = useState("");
+
+  const onReplayClick = () => {
+    setReplayTime(Date.now().toString());
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+    <main className="w-full overflow-hidden">
+      <Scene replayTime={replayTime} />
+      <header className="relative w-full pointer-events-none h-svh flex flex-col gap-6 items-center justify-center">
+        <h1 className="text-3xl md:text-8xl font-medium tracking-tighter text-black">
+          Future by AI
+        </h1>
+        <p className="text-black/70 text-lg">
+          Images prompted into existence using Gemini
+        </p>
+        <div className="flex gap-4">
+          <GeminiButton onClick={onReplayClick}>
+            Replay Intro
             <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
+              src={replayIcon}
               width={20}
               height={20}
+              alt="replay"
+              className="-mr-2"
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          </GeminiButton>
+
+          <Link href="/controls">
+            <GeminiButton>
+              With Controls
+              <Image
+                src={chevronRight}
+                width={24}
+                height={24}
+                alt="forward"
+                className="-mr-2"
+              />
+            </GeminiButton>
+          </Link>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </header>
+      <section className="relative w-full py-24 flex justify-center">
+        <GeminiParagraph />
+      </section>
+      <footer className="relative w-full h-[50vh] bg-black/5 p-16">
+        <p className="text-xl text-black/80 text-center max-w-2xl mx-auto text-balance">
+          Inspired by{" "}
+          <a
+            href="https://deepmind.google/technologies/imagen-3/"
+            target="_blank"
+            rel="noreferrer"
+            className="underline text-blue hover:text-dark-blue"
+          >
+            DeepMind Imagen
+          </a>{" "}
+          header.{" "}
+          <a
+            href="https://github.com/prag-matt-ic/imagen-header-rebuild"
+            target="_blank"
+            rel="noreferrer"
+            className="underline text-blue hover:text-dark-blue"
+          >
+            Code
+          </a>{" "}
+          by{" "}
+          <a
+            href="https://www.linkedin.com/in/matthewjfrawley/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Matthew Frawley
+          </a>
+        </p>
       </footer>
-    </div>
+
+      <Leva hidden={true} />
+    </main>
   );
 }
+
+const GeminiButton: FC<
+  PropsWithChildren<HTMLAttributes<HTMLButtonElement>>
+> = ({ children, ...buttonProps }) => {
+  return (
+    <button
+      {...buttonProps}
+      className="flex gap-2 rounded-full transition-all duration-200 px-7 py-3 font-semibold text-white bg-linear-90/oklch from-10% from-blue to-teal hover:shadow-md hover:from-dark-blue"
+    >
+      {children}
+    </button>
+  );
+};
+
+const GeminiParagraph: FC = () => {
+  return (
+    <div className="isolate size-fit bg-linear-90 from-blue to-teal bg-clip-text">
+      <p className="max-w-4xl text-black text-balance font-medium text-xl md:text-4xl text-center tracking-tight leading-snug">
+        Animated header based on the{" "}
+        <span
+          style={{
+            WebkitTextFillColor: "transparent",
+          }}
+        >
+          DeepMind Imagen
+        </span>{" "}
+        landing page. Taken to the next level with{" "}
+        <span
+          style={{
+            WebkitTextFillColor: "transparent",
+          }}
+        >
+          React Three Fiber
+        </span>{" "}
+        and{" "}
+        <span
+          style={{
+            WebkitTextFillColor: "transparent",
+          }}
+        >
+          Three.js Shading Language
+        </span>
+        . Supporting acts include GSAP and Tailwind CSS.
+      </p>
+    </div>
+  );
+};
