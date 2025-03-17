@@ -56,28 +56,26 @@ const Scene: FC<Props> = ({ replayTime }) => {
       }}
     >
       <color attach="background" args={["#fff"]} />
-      {/* <OrbitControls /> */}
       <CameraControls />
 
       {/* Left Top */}
       <ImageRevealPlane
         position={[-7, 2, -2.5]}
         width={5}
-        height={3}
+        height={4}
         imageSrc={deepmind.src}
-        isBlurred={1}
+        isBlurred={true}
         delay={0.32}
         replayTime={replayTime}
       />
       <ImageRevealPlane
         position={[-4, 3, -1]}
-        width={4}
+        width={3.8}
         height={3}
         imageSrc={utopia.src}
         delay={0.16}
         replayTime={replayTime}
       />
-
       {/* Top */}
       <ImageRevealPlane
         position={[1, 3, 0]}
@@ -88,54 +86,50 @@ const Scene: FC<Props> = ({ replayTime }) => {
         replayTime={replayTime}
       />
       <ImageRevealPlane
-        position={[5, 4, -3]}
-        width={3}
-        height={3}
-        isBlurred={1}
+        position={[6, 3.5, -3]}
+        width={4}
+        height={4}
+        isBlurred={true}
         imageSrc={bladeRunner.src}
         delay={0.2}
         replayTime={replayTime}
       />
-
       {/* Right */}
       <ImageRevealPlane
-        position={[4.5, -0.25, 0]}
-        width={3}
-        height={2}
+        position={[5, -0.25, 0]}
+        width={3.5}
+        height={2.5}
         imageSrc={coupleCoffee.src}
         delay={0}
         replayTime={replayTime}
       />
-      <ImageRevealPlane
-        position={[6.5, -2.5, -2]}
-        width={6}
-        height={4}
-        isBlurred={1}
-        imageSrc={yachts.src}
-        delay={0.3}
-        replayTime={replayTime}
-      />
-
       {/* Left */}
       <ImageRevealPlane
-        position={[-5, -2, -0.5]}
-        width={3}
-        height={3}
+        position={[-4, -2, -0.5]}
+        width={2.8}
+        height={2.8}
         imageSrc={daliParrots.src}
         delay={0.48}
         replayTime={replayTime}
       />
-
+      <ImageRevealPlane
+        position={[-6.5, -4, -2]}
+        width={6}
+        height={4}
+        isBlurred={true}
+        imageSrc={yachts.src}
+        delay={0.3}
+        replayTime={replayTime}
+      />
       {/* Bottom */}
       <ImageRevealPlane
-        position={[0, -3.5, -1]}
+        position={[1, -3.8, -1]}
         width={4.5}
         height={3}
         imageSrc={scientists.src}
         delay={0.6}
         replayTime={replayTime}
       />
-
       {process.env.NODE_ENV === "development" && <Stats />}
     </Canvas>
   );

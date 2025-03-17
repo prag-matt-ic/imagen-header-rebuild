@@ -30,6 +30,8 @@ import {
   vec4,
 } from "three/tsl";
 import MathNode from "three/src/nodes/math/MathNode.js";
+import { Vector2 } from "three";
+import { AttributeNode, Node } from "three/webgpu";
 
 // Creates a 3D rotation matrix around the Y axis.
 // Usage: const rotatedPosition = position.mul(rotation3dY(angle))
@@ -44,4 +46,29 @@ export const rotation3dY = /*#__PURE__*/ Fn(
   name: "rotation3dY",
   type: "mat3",
   inputs: [{ name: "angle", type: "float", qualifier: "in" }],
+});
+
+export const getCoverUv = /*#__PURE__*/ Fn(
+  ([uv, planeAspect, imageAspect]: [
+    uv: ShaderNodeObject<Node>,
+    planeAspect: ShaderNodeObject<Node>,
+    imageAspect: ShaderNodeObject<Node>
+  ]) => {
+    // For image cover fit, we “zoom” into the image so that the plane is completely covered
+    // UV is remapped so that the image/texture covers the plane without stretching
+    const coverUv = select(
+      planeAspect.greaterThan(imageAspect),
+      vec2(uv.x, uv.y.sub(0.5).mul(imageAspect.div(planeAspect)).add(0.5)),
+      vec2(uv.x.sub(0.5).mul(planeAspect.div(imageAspect)).add(0.5), uv.y)
+    );
+    return coverUv;
+  }
+).setLayout({
+  name: "getCoverUv",
+  type: "vec2",
+  inputs: [
+    { name: "uv", type: "vec2", qualifier: "in" },
+    { name: "planeAspect", type: "float", qualifier: "in" },
+    { name: "imageAspect", type: "float", qualifier: "in" },
+  ],
 });

@@ -28,74 +28,54 @@ import {
   vec4,
 } from "three/tsl";
 
-import { rotation3dY } from "./utils";
+import { getCoverUv, rotation3dY } from "./utils";
 
 type Props = {
   imageSrc: string;
   width: number;
   height: number;
   position: Vector3Tuple;
+  withControls?: boolean;
+  isBlurred?: boolean;
   delay?: number;
   replayTime?: string;
-  isBlurred?: number;
-  withControls?: boolean;
 };
 
 const ImageRevealPlane: FC<Props> = ({
   imageSrc,
   height,
   width,
-  isBlurred = 0,
-  replayTime,
-  delay = 0,
   position,
   withControls = false,
+  isBlurred = false,
+  delay = 0,
+  replayTime = 0,
 }) => {
   const imageTexture = useTexture(imageSrc);
   imageTexture.colorSpace = SRGBColorSpace;
-  const imageAspect = imageTexture.image.width / imageTexture.image.height;
-  const planeAspect: number = width / height;
+  const shouldExitToLeft = position[0] < 0;
 
   const {
     key,
     colorNode,
     positionNode,
     uReveal,
+    uIsBlurred,
     uEnterProgress,
     uExitProgress,
-    uIsBlurred,
   } = useMemo(() => {
     const uIsBlurred = uniform(int(isBlurred));
-    const uReveal = uniform(float(0)); // Drives the mask reveal
-    const uEnterProgress = uniform(float(0)); // Drives the initial translation
-    const uExitProgress = uniform(float(0)); // Drives the scroll influenced position
+    const uEnterProgress = uniform(float(0)); // Drives the entering position
+    const uExitProgress = uniform(float(0)); // Drives the scroll-influenced exiting position
+    const uReveal = uniform(float(1)); // Drives the mask reveal
 
-    const planeAspectF = float(planeAspect);
-    const imageAspectF = float(imageAspect);
-
-    const shouldExitLeft = position[0] < 0;
+    const planeAspect = float(width / height);
+    const imageAspect = float(
+      imageTexture.image.width / imageTexture.image.height
+    );
 
     const colorNode = Fn(() => {
-      // For cover fit, we “zoom” into the image so that the plane is completely covered
-      // Remap the uv so that the image covers the plane without stretching
-      const coverUv = select(
-        planeAspectF.greaterThan(imageAspectF),
-        vec2(
-          uv().x,
-          uv()
-            .y.sub(0.5)
-            .mul(imageAspect / planeAspect)
-            .add(0.5)
-        ),
-        vec2(
-          uv()
-            .x.sub(0.5)
-            .mul(planeAspect / imageAspect)
-            .add(0.5),
-          uv().y
-        )
-      );
-      // Sample the texture color
+      const coverUv = getCoverUv(uv(), planeAspect, imageAspect);
       const textureColor = texture(imageTexture, coverUv);
 
       // Mark as variable so we can modify it when blurred
@@ -107,47 +87,45 @@ const ImageRevealPlane: FC<Props> = ({
         colour.assign(blurred);
       });
 
-      const center = vec2(0.5, 0.5);
-      const distanceToCenter = coverUv.sub(center);
-
-      // Determine the maximum half‑size for each axis based on the cover UV.
-      const halfSize = select(
-        planeAspectF.greaterThan(imageAspectF),
-        vec2(float(0.5), float(0.5).mul(imageAspect / planeAspect)),
-        vec2(float(0.5).mul(planeAspect / imageAspect), float(0.5))
-      );
-
-      const revealingHalfSize = halfSize.mul(uReveal);
-
-      // --- Compute the scaled SDF for a rounded rectangle ---
-      // Desired constant rounding value (in UV units).
+      // Reveal mask
+      const distanceToCenter = coverUv.sub(vec2(0.5, 0.5));
       const borderRadius = float(0.08).mul(uReveal);
-      // If blurred, we use a higher softness threshold for softer edges.
-      const finalSoftness = select(uIsBlurred, float(0.1), float(0.0001));
-      const softness = mix(0.1, finalSoftness, uReveal);
+      // If blurred, we use a higher softness threshold to create soft edges
+      const finalSoftness = select(uIsBlurred, float(0.12), float(0.0001));
+      const softness = mix(float(0.1), finalSoftness, uReveal);
 
-      // Instead of using rectHalfSize, use the scaled halfSize so the SDF shrinks with uVisibility.
-      const d = vec2(abs(distanceToCenter.x), abs(distanceToCenter.y)).sub(
-        revealingHalfSize.sub(borderRadius).sub(softness)
+      // Determine the maximum half‑dimensions for each axis based on the cover UV.
+      const maxHalfSize = select(
+        planeAspect.greaterThan(imageAspect),
+        vec2(float(0.5), float(0.5).mul(imageAspect.div(planeAspect))),
+        vec2(float(0.5).mul(planeAspect.div(imageAspect)), float(0.5))
       );
+      // Scale the maxHalfSize by the reveal factor to make the mask grow
+      const revealedHalfSize = maxHalfSize.mul(uReveal);
+
+      // Compute the SDF for a rounded rectangle
+      // By using revealedHalfSize for distance the shape grows with the reveal factor
+      const distanceToEdge = vec2(
+        abs(distanceToCenter.x),
+        abs(distanceToCenter.y)
+      ).sub(revealedHalfSize.sub(borderRadius).sub(softness));
 
       // Signed distance function for a rounded rectangle
-      const sdfRoundedRect = min(max(d.x, d.y), 0.0)
-        .add(length(max(d, 0.0)))
+      const sdfRoundedRect = min(max(distanceToEdge.x, distanceToEdge.y), 0.0)
+        .add(length(max(distanceToEdge, 0.0)))
         .sub(borderRadius);
 
       const mask = oneMinus(smoothstep(0.0, softness, sdfRoundedRect));
 
       // Mix a fully transparent color with the texture color based on the mask.
-      // When mask is 0, returns transparent; when mask is 1, returns texColor.
+      // When mask is 0 it's transparent. When mask is 1, returns texture colour.
       return mix(vec4(colour.rgb, 0), colour, mask);
     })();
 
-    // Move the plane from 3 -> 0 based on the uEnterPosition value (0 -> 1).
     const positionNode = Fn(() => {
       const enterProgressMinusOne = oneMinus(uEnterProgress);
       const exitY = uExitProgress.mul(10);
-      const exitX = uExitProgress.mul(shouldExitLeft ? -1.5 : 1.5);
+      const exitX = uExitProgress.mul(shouldExitToLeft ? -1.5 : 1.5);
       const exitZ = uExitProgress.mul(2);
 
       const pos = positionLocal
@@ -170,13 +148,13 @@ const ImageRevealPlane: FC<Props> = ({
     return {
       key,
       colorNode,
-      positionNode,
       uReveal,
+      uIsBlurred,
       uEnterProgress,
       uExitProgress,
-      uIsBlurred,
+      positionNode,
     };
-  }, [isBlurred, planeAspect, imageAspect, position, imageTexture]);
+  }, [height, imageTexture, isBlurred, shouldExitToLeft, width]);
 
   const [_, set] = useControls(() => ({
     blur: {
@@ -191,7 +169,7 @@ const ImageRevealPlane: FC<Props> = ({
       },
     },
     reveal: {
-      value: 0,
+      value: 1,
       min: 0,
       max: 1,
       step: 0.01,
@@ -212,12 +190,12 @@ const ImageRevealPlane: FC<Props> = ({
         uEnterProgress.value = value;
       },
     },
-    both: {
+    enter: {
       value: 0,
       min: 0,
       max: 1,
       step: 0.01,
-      label: "Both",
+      label: "Enter (both)",
       onChange: (value) => {
         if (!withControls) return;
         uReveal.value = value;
@@ -241,7 +219,7 @@ const ImageRevealPlane: FC<Props> = ({
         },
       }
     );
-    const positionTween = gsap.fromTo(
+    const enterPositionTween = gsap.fromTo(
       uEnterProgress,
       { value: 0 },
       {
@@ -257,7 +235,7 @@ const ImageRevealPlane: FC<Props> = ({
     );
     return () => {
       revealTween.kill();
-      positionTween.kill();
+      enterPositionTween.kill();
     };
   }, [delay, replayTime, set, uEnterProgress, uReveal, withControls]);
 
@@ -279,9 +257,10 @@ const ImageRevealPlane: FC<Props> = ({
       <Plane position={position} args={[width, height, 1, 1]}>
         <meshBasicNodeMaterial
           key={key}
-          transparent={true}
+          color={"blue"}
           colorNode={colorNode}
           positionNode={positionNode}
+          transparent={true}
           depthTest={false}
         />
       </Plane>
