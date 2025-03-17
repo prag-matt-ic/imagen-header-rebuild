@@ -19,21 +19,6 @@ import Scene from "@/components/Scene";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger, SplitText);
 
-// Setup the WebGPU renderer
-// Load image with useTexture hook
-// Display on a plane with basic color node
-// Fix stretching and aspect ratio with UV transformation
-
-// Generate a rounded box signed distance function (SDF)
-// Scale this to create the reveal effect
-
-// Position the image components
-// Setup an animation for each of their reveal effects
-
-// Create UI components
-// - CSS color function to generate darker blue and teal from the original colors
-// - New Tailwind 4 gradient syntax
-
 export default function ImagenHeaderPage() {
   const [replayTime, setReplayTime] = useState("");
 
@@ -122,7 +107,7 @@ const GeminiButton: FC<
   return (
     <button
       {...buttonProps}
-      className="flex gap-2 rounded-full transition-all duration-200 px-7 py-3 font-semibold text-white bg-linear-90/oklch from-10% from-blue to-teal hover:shadow-md hover:from-dark-blue"
+      className="flex gap-2 rounded-full transition-all duration-200 px-7 py-3 font-semibold text-white bg-linear-90/oklch from-10% from-blue to-teal hover:shadow-md hover:from-dark-blue hover:to-dark-teal"
     >
       {children}
     </button>
@@ -162,3 +147,22 @@ const GeminiParagraph: FC = () => {
     </div>
   );
 };
+
+// Setup the WebGPU renderer
+
+// Load image with useTexture hook
+// Display it on a plane with basic color node
+
+// Fix the stretching and aspect ratio with UV transformation
+
+// Generate a rounded box signed distance function (SDF) to add border radius
+// Scale this using a uniform to create the reveal effect
+
+// Setup a position node to rotate and translate the plane on enter
+
+// Position the image components
+// Setup an animation for each of their reveal effects
+
+// Create UI components
+// - CSS color function to generate darker blue and teal from the original colors
+// - New Tailwind 4 gradient syntax

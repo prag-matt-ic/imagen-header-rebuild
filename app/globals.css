@@ -13,10 +13,10 @@
   --color-blue: #4285F4;
   --color-teal: #2DAEB8;
 
-  /* Create dark colours by reducing the lightness */
+  /* Create dark colours by reducing the saturation and lightness */
   /* https://ishadeed.com/article/css-relative-colors/ */
-  --color-dark-blue: hsl(from var(--color-blue) h calc(s - 30) calc(l - 20)); 
-  --color-dark-teal: hsl(from var(--color-teal) h calc(s - 30) calc(l - 20));
+  --color-dark-blue: hsl(from var(--color-blue) h calc(s - 10) calc(l - 10)); 
+  --color-dark-teal: hsl(from var(--color-teal) h calc(s - 10) calc(l - 10));
 }
 
 body {
