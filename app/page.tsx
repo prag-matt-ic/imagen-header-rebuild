@@ -85,6 +85,15 @@ export default function ImagenHeaderPage() {
           >
             Code
           </a>{" "}
+          and{" "}
+          <a
+            href="https://youtu.be/DCjiZW82_Y0?si=YBZrCAZmjbCZB3AB"
+            target="_blank"
+            rel="noreferrer"
+            className="underline text-teal hover:text-dark-teal"
+          >
+            Youtube Video
+          </a>{" "}
           by{" "}
           <a
             href="https://www.linkedin.com/in/matthewjfrawley/"
