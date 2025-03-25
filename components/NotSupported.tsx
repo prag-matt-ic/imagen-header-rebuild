@@ -9,7 +9,16 @@ const NotSupported: FC = () => {
       <p className="leading-loose text-blue">
         This experiences uses an experimental technology (WebGPU).
         <br />
-        Please open it using a desktop version of Chrome/Edge.
+        Please open it using a{" "}
+        <a
+          target="_blank"
+          rel="noreferrer"
+          className="underline text-blue hover:text-dark-blue"
+          href="https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API#browser_compatibility"
+        >
+          compatible browser
+        </a>
+        .
       </p>
     </section>
   );
